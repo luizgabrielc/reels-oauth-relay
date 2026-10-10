@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Wqwidjb8zW1MVn5gvaca7lVVpelcrwqJCJOdAiVAWRQ='; style-src 'unsafe-inline'">
+  <title>Reels Local</title>
+  <style>body{font:16px system-ui,sans-serif;max-width:32rem;margin:3rem auto;padding:0 16px;color:#222;background:#fff}</style>
+</head>
+<body>
+  <main>
+    <h1>Voltando para o painel…</h1>
+    <p id="status">Se nada acontecer, confira se o painel está aberto em http://127.0.0.1:8765.</p>
+  </main>
+  <script>
+    (function () {
+      // Página estática de repasse: o Instagram Login exige redirect URI HTTPS, e o painel só escuta em
+      // http://127.0.0.1. O destino é fixo e só os parâmetros do OAuth seguem adiante.
+      var TARGET = "http://127.0.0.1:8765/publication/oauth/callback";
+      var ALLOWED = ["code", "state", "error", "error_reason", "error_description"];
+      var source = new URLSearchParams(window.location.search);
+      var forward = new URLSearchParams();
+      ALLOWED.forEach(function (name) {
+        var value = source.get(name);
+        if (value !== null && value.length <= 4096) forward.set(name, value);
+      });
+      if (!forward.has("state") || !(forward.has("code") || forward.has("error"))) {
+        document.getElementById("status").textContent = "Nenhuma autorização para repassar. Volte ao painel e use Conectar conta.";
+        return;
+      }
+      window.history.replaceState(null, "", window.location.pathname);
+      window.location.replace(TARGET + "?" + forward.toString());
+    })();
+  </script>
+</body>
+</html>
